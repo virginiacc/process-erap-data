@@ -18,3 +18,17 @@ table {
   width: 30%;
   margin: 0 auto;
 }
+
+.changedTable {
+  width: 100%;
+  
+
+}
+.changedTable td {
+  width: 33%;
+  
+}
+
+.changedTable td span {
+  word-break: break-all;
+}

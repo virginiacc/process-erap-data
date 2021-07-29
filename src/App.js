@@ -1,7 +1,9 @@
 import './App.css';
 import { useState } from 'react';
 import CSVReaderComponent from './CSVReader.js';
-import { generateJSON, processPrograms } from './utils.js';
+import { diff, generateJSON, processPrograms } from './utils.js';
+// import prev from './latest.json';
+
 
 // Processing involves:
 // - removing first three rows of headers from tsv
@@ -25,18 +27,27 @@ function App() {
   const [ noContact, setNoContact ]= useState( [] );
   const [ noURL, setNoURL ]= useState( [] );
   const [ noCounty, setNoCounty ]= useState( [] );
+  const [ allData, setAllData ]= useState( [] );
+  // const [ changed, setChanged ] = useState( [] );
 
   const csvToJSON = data => {
-    const json = generateJSON( data );
-    const results = processPrograms( json );
+    let importedJSON = generateJSON( data );
+    const results = processPrograms( importedJSON );
     setPrograms( results.programs )
     setNoContact( results.noContact );
     setNoURL( results.noURL );
     setNoCounty( results.noCounty );
+    setAllData(importedJSON)
+    // let updates = diff(prev, importedJSON)
+    // setChanged(updates.changed)
   }
 
   const copy = () => {
     navigator.clipboard.writeText( JSON.stringify(programs) )
+  }
+
+  const copyFull = () => {
+    navigator.clipboard.writeText( JSON.stringify(allData) )
   }
 
   return (
@@ -80,6 +91,43 @@ function App() {
             </ul>
           </div>
         }
+{/*         <h2>Changed: {changed.length}</h2> */}
+{/*         <ul> */}
+{/*         {changed.map(( item, index) => ( */}
+{/*           <li>  - { item[0] } </li> */}
+{/*         ))} */}
+{/* </ul> */}
+{/*         {changed.map(( item, index) => ( */}
+{/*             <div className="block block__sub" key={index}> */}
+{/*                 <table className="changedTable"> */}
+{/*                     <thead> */}
+{/*                       <tr> */}
+{/*                         <th>{item[0]}</th> */}
+{/*                         <th>Before</th> */}
+{/*                         <th>After</th> */}
+{/*                       </tr> */}
+{/*                     </thead> */}
+{/*                     <tbody> */}
+{/*                       {item[1].map(( prop, i ) => ( */}
+{/*                          */}
+{/*                             <tr> */}
+{/*                               <td> */}
+{/*                                 {prop[0]} */}
+{/*                               </td> */}
+{/*                               <td> */}
+{/*                                 <span>{prop[1]}</span> */}
+{/*                               </td> */}
+{/*                               <td> */}
+{/*                                 <span>{prop[2]}</span> */}
+{/*                               </td> */}
+{/*                             </tr> */}
+{/*                          */}
+{/*                          */}
+{/*                       ))} */}
+{/*                   </tbody> */}
+{/*                   </table> */}
+{/*             </div> */}
+{/*         ))} */}
         
         <div className="block">
           <h2> There are {programs.length} programs</h2>
@@ -98,15 +146,15 @@ function App() {
             <tbody>
           { programs.map( ( item, index ) => (
               <tr key={index}>
-                <td>{ item["State"] }</td>
-                <td>{ item["Type"] }</td>
-                <td>{ item["Name"] }</td>
-                <td>{ item["Program"] }</td>
-                <td className="url">{ item["URL"] }</td>
+                <td>{ item.state }</td>
+                <td>{ item.type }</td>
+                <td>{ item.name }</td>
+                <td>{ item.program }</td>
+                <td className="url">{ item.url }</td>
                 <td>{ item["Phone"] }</td>
                 <td>
                   <ul>
-                    { item["County"] && item["County"].map( ( county, index ) => (
+                    { item.county && item.county.map( ( county, index ) => (
                       <li  key={ index }>{ county }</li>
                     ) ) } 
                     </ul>
@@ -117,10 +165,13 @@ function App() {
           </table>
         </div>
         <h2>JSON</h2>
-        <button className="a-btn u-mb15" onClick={ copy }>Copy</button>
+        <button className="a-btn u-mb15" onClick={ copy }>Copy JSON</button>
         <div className="json">
           { JSON.stringify(programs) }
         </div>
+        <button className="a-btn u-mb15" onClick={ copyFull }>Copy ALL JSON</button>
+
+
       </div>
       }
     </div>

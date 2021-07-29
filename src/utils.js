@@ -9,11 +9,11 @@ export const generateJSON = data => {
 export const getContactInfo = ( val, program ) => {
   if ( val ) {
     if ( val.startsWith( 'http' ) ){
-      return ['URL', val];
+      return ['url', val];
     } else if ( val.startsWith( 'www' ) ) {
-      return ['URL', 'http://' + val ];
+      return ['url', 'http://' + val ];
     } else {
-      return ['Phone', val];
+      return ['phone', val];
     }
   }
 }
@@ -28,23 +28,23 @@ export const processPrograms = programs => {
     // Copy and rename values
     // Copy Geographic Level as Type
     let type = item['Geographic Level'];
-    itemCopy['Type'] = type;
+    itemCopy['type'] = type;
     // Copy State as State
-    itemCopy['State'] = item['State'];
+    itemCopy['state'] = item['State'];
     // Set State to territory name if territory
     if ( type === 'Territory' ) {
       let val = item['Tribal Government/ Territory'];
       if ( val === 'Commonwealth of the Northern Mariana Islands' ) {
         // Rename Mariana Islands to match state name
-        itemCopy['State'] = 'Northern Mariana Islands';
+        itemCopy['state'] = 'Northern Mariana Islands';
       } else {
-        itemCopy['State'] = val;
+        itemCopy['state'] = val;
       }
     }
     // copy Program Name as Program
-    itemCopy['Program'] = item['Program Name'];
+    itemCopy['program'] = item['Program Name'];
     // Set Name based on type
-    itemCopy['Name'] = item['City/County/ Locality'] ||
+    itemCopy['name'] = item['City/County/ Locality'] ||
                        item['Tribal Government/ Territory'] ||
                        item['State'];
     // Add County if type === 'City'
@@ -52,7 +52,7 @@ export const processPrograms = programs => {
       const state = item['State'];
       let stateObj = counties[state] || {};
       let county = stateObj[item['City/County/ Locality']]
-      itemCopy['County'] = county;
+      itemCopy['county'] = county;
       if (!county) {
         noCounty.push( `${item['City/County/ Locality']}, ${item['State']}`)
       }
@@ -64,7 +64,7 @@ export const processPrograms = programs => {
     )
     if (contact) {
       itemCopy[contact[0]] = contact[1];
-      if ( contact[0] === 'Phone' ) {
+      if ( contact[0] === 'phone' ) {
         noURL.push( [item['Program Name'], contact[1]] )
       }
     } else {
@@ -79,3 +79,52 @@ export const processPrograms = programs => {
     noURL: noURL
   }
 }
+
+export const diff = ( prev, current ) => {
+  let changedRecords = [];
+  let addedRecords = [];
+  let removedRecords = [];
+  let foundRecords = [];
+  current.forEach( item => {
+    let match = false;
+    let changed = [];
+    prev.some( prevItem => {
+      if ( item['Program Name'] === prevItem['Program Name']  && item['State'] === prevItem['State']) {
+        match = true;
+        Object.keys( item ).forEach( key => {
+          if ( item[key] !== prevItem[key] ) {
+            changed.push([key, prevItem[key], item[key]])
+          }
+        })
+        return match
+      }
+      return false;
+    })
+    if ( match ) {
+      foundRecords.push( item['Program Name'] );
+      if ( Object.keys(changed).length ) {
+        changedRecords.push([item['City/County/ Locality'] + ', ' + item['State'] + ': ' + changed[0][2], changed])
+      }
+    } else {
+      addedRecords.push(item)
+    }
+  })
+  console.log(foundRecords)
+  prev.forEach( item => {
+    if ( !foundRecords.includes(item['Program Name'] )) {
+      removedRecords.push(item)
+    }
+  })
+
+  return {
+    added: addedRecords, 
+    removed: removedRecords,
+    changed: changedRecords
+  }
+}
+
+
+
+
+
+
