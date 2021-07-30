@@ -18,7 +18,13 @@ export const getContactInfo = ( val, program ) => {
   }
 }
 
+const sortByName = ( a, b ) => {
+  return a['name'].localeCompare( b['name'] );
+}
+
 export const processPrograms = programs => {
+  let geographic = [];
+  let tribal = [];
   let results = [];
   let noContact = [];
   let noURL = [];
@@ -29,6 +35,7 @@ export const processPrograms = programs => {
     // Copy Geographic Level as Type
     let type = item['Geographic Level'];
     itemCopy['type'] = type;
+
     // Copy State as State
     itemCopy['state'] = item['State'];
     // Set State to territory name if territory
@@ -70,10 +77,18 @@ export const processPrograms = programs => {
     } else {
       noContact.push(item['Program Name']);
     }
-    results.push(itemCopy)
+    if ( type === 'Tribal Government' ) {
+      tribal.push(itemCopy)
+    } else {
+      geographic.push(itemCopy)
+    }
+    tribal.sort(sortByName)
   })
+
+  console.log(tribal)
   return {
-    programs: results,
+    geographic: geographic,
+    tribal: tribal,
     noContact: noContact,
     noCounty: noCounty,
     noURL: noURL
@@ -115,7 +130,8 @@ export const diff = ( prev, current ) => {
       removedRecords.push(item)
     }
   })
-
+  console.log('removed', removedRecords)
+  console.log('added', addedRecords)
   return {
     added: addedRecords, 
     removed: removedRecords,
