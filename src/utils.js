@@ -96,6 +96,8 @@ export const processPrograms = programs => {
 }
 
 export const diff = ( prev, current ) => {
+  console.log(prev)
+  console.log(current)
   let changedRecords = [];
   let addedRecords = [];
   let removedRecords = [];
@@ -104,11 +106,13 @@ export const diff = ( prev, current ) => {
     let match = false;
     let changed = [];
     prev.some( prevItem => {
-      if ( item['Program Name'] === prevItem['Program Name']  && item['State'] === prevItem['State']) {
+      if ( item.program === prevItem.program  && item.state === prevItem.state) {
         match = true;
         Object.keys( item ).forEach( key => {
-          if ( item[key] !== prevItem[key] ) {
-            changed.push([key, prevItem[key], item[key]])
+          if (key !== 'county') {
+            if ( item[key] !== prevItem[key] ) {
+              changed.push([key, prevItem[key], item[key]])
+            }
           }
         })
         return match
@@ -116,9 +120,9 @@ export const diff = ( prev, current ) => {
       return false;
     })
     if ( match ) {
-      foundRecords.push( item['Program Name'] );
+      foundRecords.push( item.program );
       if ( Object.keys(changed).length ) {
-        changedRecords.push([item['City/County/ Locality'] + ', ' + item['State'] + ': ' + changed[0][2], changed])
+        changedRecords.push([item.name + ', ' + item.state + ': ' + changed[0][2], changed])
       }
     } else {
       addedRecords.push(item)
@@ -126,7 +130,7 @@ export const diff = ( prev, current ) => {
   })
   console.log(foundRecords)
   prev.forEach( item => {
-    if ( !foundRecords.includes(item['Program Name'] )) {
+    if ( !foundRecords.includes(item.program )) {
       removedRecords.push(item)
     }
   })

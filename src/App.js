@@ -25,31 +25,41 @@ import prev from './latest.json';
 function App() {
   const [ tribal, setTribal ] = useState( [] );
   const [ geographic, setGeographic ] = useState( [] );
+  const [ programs, setPrograms ] = useState( [] );
   const [ noContact, setNoContact ]= useState( [] );
   const [ noURL, setNoURL ]= useState( [] );
   const [ noCounty, setNoCounty ]= useState( [] );
-  const [ allData, setAllData ]= useState( [] );
   const [ changed, setChanged ] = useState( [] );
+  const [ added, setAdded ] = useState( [] );
+  const [ removed, setRemoved ] = useState( [] );
 
   const csvToJSON = data => {
+    console.log(data)
     let importedJSON = generateJSON( data );
     const results = processPrograms( importedJSON );
     setGeographic( results.geographic )
     setTribal( results.tribal )
+
+    let pro = results.geographic.concat(results.tribal)
+    setPrograms(pro)
+
+    console.log("PRO", pro)
     setNoContact( results.noContact );
     setNoURL( results.noURL );
     setNoCounty( results.noCounty );
-    setAllData(importedJSON)
-    let updates = diff(prev, importedJSON)
+    let updates = diff( prev, pro )
     setChanged(updates.changed)
+    setRemoved(updates.removed)
+    setAdded(updates.added)
   }
 
   const copy = () => {
     navigator.clipboard.writeText( JSON.stringify({"geographic": geographic, "tribal": tribal}) )
   }
 
+
   const copyFull = () => {
-    navigator.clipboard.writeText( JSON.stringify(allData) )
+    navigator.clipboard.writeText( JSON.stringify(programs) )
   }
 
   return (
@@ -94,11 +104,11 @@ function App() {
           </div>
         }
         <h2>Changed: {changed.length}</h2>
-        <ul>
-        {changed.map(( item, index) => (
-          <li>  - { item[0] } </li>
-        ))}
-</ul>
+{/*         <ul> */}
+{/*         {changed.map(( item, index) => ( */}
+{/*           <li>  - { item[0] } </li> */}
+{/*         ))} */}
+{/* </ul> */}
         {changed.map(( item, index) => (
             <div className="block block__sub" key={index}>
                 <table className="changedTable">
@@ -130,7 +140,25 @@ function App() {
                   </table>
             </div>
         ))}
-        
+
+        <div className="block" >
+          <h2>Added: {added.length}</h2>
+          <ul>
+          {added.map(( item, index) => (
+              <li key={index}>{item.name}</li>
+          ))}
+          </ul>
+        </div>
+
+        <div className="block" >
+          <h2>Removed: {removed.length}</h2>
+          <ul>
+          {removed.map(( item, index) => (
+              <li key={index}>{item.name}</li>
+          ))}
+          </ul>
+        </div>
+
         <div className="block">
           <h2> There are {geographic.length} geographic programs</h2>
           <table>
@@ -203,11 +231,10 @@ function App() {
         </div>
         <h2>JSON</h2>
         <button className="a-btn u-mb15" onClick={ copy }>Copy JSON</button>
-        <div className="json">
-          { JSON.stringify({"geographic": geographic, "tribal": tribal}) }
-        </div>
+        {/* <div className="json"> */}
+        {/*   { JSON.stringify({"geographic": geographic, "tribal": tribal}) } */}
+        {/* </div> */}
         <button className="a-btn u-mb15" onClick={ copyFull }>Copy ALL JSON</button>
-
 
       </div>
       }
