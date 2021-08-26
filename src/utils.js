@@ -16,10 +16,14 @@ export const getContactInfo = ( val, program ) => {
       return ['phone', val];
     }
   }
+
+  // if ( ['http', 'www', '.gov'].some( s => val.includes( s ) ) ) {
+  //     return ['url', val];
+  //   } 
 }
 
 const sortByName = ( a, b ) => {
-  return a['name'].localeCompare( b['name'] );
+  return a.name.localeCompare( b.name );
 }
 
 export const processPrograms = programs => {
@@ -82,7 +86,7 @@ export const processPrograms = programs => {
     } else {
       geographic.push(itemCopy)
     }
-    tribal.sort(sortByName)
+    tribal.sort((a,b)=> a.name.localeCompare( b.name ))
   })
 
   console.log(tribal)
@@ -98,6 +102,7 @@ export const processPrograms = programs => {
 export const diff = ( prev, current ) => {
   console.log(prev)
   console.log(current)
+  prev = [...prev.geographic, ...prev.tribal]
   let changedRecords = [];
   let addedRecords = [];
   let removedRecords = [];
