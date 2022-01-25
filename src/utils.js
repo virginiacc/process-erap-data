@@ -26,6 +26,23 @@ const sortByName = ( a, b ) => {
   return a.name.localeCompare( b.name );
 }
 
+const getProgramName = ( type, item ) => {
+  switch( type ) {
+    case 'State':
+      return item['State'];
+    case 'County':
+    case 'City':
+      return item['City/County/ Locality'];
+    case 'Tribal Government':
+    case 'Territory':
+      return item['Tribal Government/ Territory'];
+    default:
+      return item['City/County/ Locality'] ||
+             item['Tribal Government/ Territory'] ||
+             item['State'];
+  }
+}
+
 export const processPrograms = programs => {
   let geographic = [];
   let tribal = [];
@@ -33,6 +50,8 @@ export const processPrograms = programs => {
   let noContact = [];
   let noURL = [];
   let noCounty = [];
+  let statuses = new Set();
+  let statusCount = {};
   programs.forEach( item => {
     let itemCopy = {};
     // Copy and rename values
@@ -54,10 +73,23 @@ export const processPrograms = programs => {
     }
     // copy Program Name as Program
     itemCopy['program'] = item['Program Name'];
+    // set status
+    // let stat = item['Program Status'];
+    // itemCopy['status'] = stat;
+    // statuses.add(stat)
+    // let count = statusCount[stat] || 0;
+    // statusCount[stat] = count + 1;
+    //  
     // Set Name based on type
-    itemCopy['name'] = item['City/County/ Locality'] ||
-                       item['Tribal Government/ Territory'] ||
-                       item['State'];
+    itemCopy['name'] = getProgramName( type, item );
+    let test = item['City/County/ Locality'] ||
+             item['Tribal Government/ Territory'] ||
+             item['State'];
+    if ( test !== itemCopy['name'] ) {
+      console.log('different', itemCopy['type'], itemCopy['name'], test)
+
+    }
+
     // Add County if type === 'City'
     if ( type === 'City' ) {
       const state = item['State'];
@@ -90,6 +122,9 @@ export const processPrograms = programs => {
   })
 
   console.log(tribal)
+  console.log(statuses)
+    console.log(statusCount)
+
   return {
     geographic: geographic,
     tribal: tribal,
